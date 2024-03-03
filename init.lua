@@ -222,6 +222,27 @@ require('lazy').setup({
     end,
   },
 
+  { -- Autoformat
+    'stevearc/conform.nvim',
+    opts = {
+      notify_on_error = false,
+      format_on_save = {
+        lsp_fallback = true,
+        async = true,
+      },
+      formatters_by_ft = {
+        lua = { 'stylua' },
+        -- Conform can also run multiple formatters sequentially
+        -- python = { "isort", "black" },
+        -- You can use a sub-list to tell conform to run *until* a formatter
+        -- is found.
+        javascript = { { 'prettier' } },
+        typescript = { { 'prettier' } },
+        typescriptreact = { { 'prettier' } },
+      },
+    },
+  },
+
   {
     -- Autocompletion
     'hrsh7th/nvim-cmp',
@@ -239,7 +260,7 @@ require('lazy').setup({
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim',  opts = {} },
+  { 'folke/which-key.nvim', opts = {} },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -333,7 +354,7 @@ require('lazy').setup({
         end,
       },
       { 'nvim-telescope/telescope-ui-select.nvim' },
-      { 'nvim-tree/nvim-web-devicons' }
+      { 'nvim-tree/nvim-web-devicons' },
     },
   },
 
@@ -360,6 +381,13 @@ require('lazy').setup({
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
   { import = 'custom.plugins' },
 }, {})
+
+-- vim.api.nvim_create_autocmd('BufWritePre', {
+--   pattern = '*',
+--   callback = function(args)
+--     require('conform').format { bufnr = args.buf }
+--   end,
+-- })
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -514,13 +542,13 @@ vim.keymap.set('n', '<leader>fn', function()
 end, { desc = '[S]earch [N]eovim files' })
 
 -- Tmux navigation symbols
-vim.keymap.set('n', '<C-h>', "<cmd> TmuxNavigateLeft<CR>", { desc = 'navigate to left tmux pane' })
-vim.keymap.set('n', '<C-l>', "<cmd> TmuxNavigateRight<CR>", { desc = 'navigate to right tmux pane' })
-vim.keymap.set('n', '<C-j>', "<cmd> TmuxNavigateDown<CR>", { desc = 'navigate to down tmux pane' })
-vim.keymap.set('n', '<C-k>', "<cmd> TmuxNavigateUp<CR>", { desc = 'navigate to up tmux pane' })
+vim.keymap.set('n', '<C-h>', '<cmd> TmuxNavigateLeft<CR>', { desc = 'navigate to left tmux pane' })
+vim.keymap.set('n', '<C-l>', '<cmd> TmuxNavigateRight<CR>', { desc = 'navigate to right tmux pane' })
+vim.keymap.set('n', '<C-j>', '<cmd> TmuxNavigateDown<CR>', { desc = 'navigate to down tmux pane' })
+vim.keymap.set('n', '<C-k>', '<cmd> TmuxNavigateUp<CR>', { desc = 'navigate to up tmux pane' })
 
 -- Utilities
-vim.keymap.set('n', '<leader>uf', ":let @+ = expand(\"%\")<cr>", { desc = 'get relative filepath' })
+vim.keymap.set('n', '<leader>uf', ':let @+ = expand("%")<cr>', { desc = 'get relative filepath' })
 
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
@@ -754,7 +782,7 @@ cmp.setup {
   },
 }
 
-vim.cmd.colorscheme "catppuccin-mocha"
+vim.cmd.colorscheme 'catppuccin-mocha'
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
 vim.g.loaded_node_provider = 0
