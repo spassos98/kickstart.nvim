@@ -45,7 +45,7 @@ P.S. You can delete this when you're done too. It's your config now :)
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
-
+vim.wo.relativenumber = true
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    https://github.com/folke/lazy.nvim
 --    `:help lazy.nvim.txt` for more info
@@ -154,6 +154,13 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         gopls = {},
+        svelte = {
+          capabilities = {
+            workspace = {
+              didChangeWatchedFiles = false,
+            },
+          },
+        },
         -- pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -162,7 +169,7 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
-        tsserver = {},
+        -- tsserver = {},
         lua_ls = {
           -- cmd = {...},
           -- filetypes { ...},
@@ -710,13 +717,23 @@ end, 0)
 
 -- [[ Configure LSP ]]
 --  This function gets run when an LSP connects to a particular buffer.
-local on_attach = function(_, bufnr)
+local on_attach = function(client, bufnr)
   -- NOTE: Remember that lua is a real programming language, and as such it is possible
   -- to define small helper and utility functions so you don't have to repeat yourself
   -- many times.
   --
   -- In this case, we create a function that lets us more easily define mappings specific
   -- for LSP related items. It sets the mode, buffer and description for us each time.
+  if client.name == 'svelte' then
+    vim.api.nvim_create_autocmd('BufWritePost', {
+      pattern = { '*.js', '*.ts' },
+      group = vim.api.nvim_create_augroup('svelte_ondidchangetsorjsfile', { clear = true }),
+      callback = function(ctx)
+        -- Here use ctx.match instead of ctx.file
+        client.notify('$/onDidChangeTsOrJsFile', { uri = ctx.match })
+      end,
+    })
+  end
   local nmap = function(keys, func, desc)
     if desc then
       desc = 'LSP: ' .. desc
@@ -783,7 +800,8 @@ local servers = {
   -- gopls = {},
   -- pyright = {},
   -- rust_analyzer = {},
-  tsserver = { 'tsserver' },
+  svelte = {},
+  -- tsserver = { 'tsserver' },
   html = { filetypes = { 'html', 'twig', 'hbs' } },
   lua_ls = {
     Lua = {
