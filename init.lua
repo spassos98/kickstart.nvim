@@ -116,9 +116,9 @@ require('lazy').setup({
 
           map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
 
-          map('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
+          map('<leader>lr', vim.lsp.buf.rename, 'Rename')
 
-          map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
+          map('<leader>la', vim.lsp.buf.code_action, 'Code action')
 
           map('K', vim.lsp.buf.hover, 'Hover Documentation')
 
@@ -542,6 +542,27 @@ vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnos
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
 
+-- Window keymap
+function testWindow()
+  local width = 50
+  local height = 10
+  local buf = vim.api.nvim_create_buf(false, true)
+  local window = vim.api.nvim_get_current_win()
+  local cursor_pos = vim.api.nvim_win_get_cursor(window)
+  print(cursor_pos)
+  local conf = {
+    relative = 'editor',
+    width = width,
+    height = height,
+    col = 10,
+    row = 10,
+    style = 'minimal',
+  }
+  vim.api.nvim_open_win(buf, true, conf)
+  return buf
+end
+vim.keymap.set('n', '<leader>k', testWindow, { desc = 'Open window' })
+
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
 local highlight_group = vim.api.nvim_create_augroup('YankHighlight', { clear = true })
@@ -745,8 +766,9 @@ local on_attach = function(client, bufnr)
     vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
   end
 
-  nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
-  nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
+  -- nmap('<leader>lr', vim.lsp.buf.rename, 'Rename')
+  nmap('<leader>lr', '<cmd>lua require("renamer").rename()<cr>', 'Rename')
+  nmap('<leader>la', vim.lsp.buf.code_action, 'Code action')
 
   nmap('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
   nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
@@ -775,11 +797,10 @@ end
 
 -- document existing key chains
 require('which-key').register {
-  ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
+  ['<leader>l'] = { name = '[L]sp', _ = 'which_key_ignore' },
   ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
   ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
   ['<leader>h'] = { name = 'More git', _ = 'which_key_ignore' },
-  ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
   ['<leader>f'] = { name = '[F]find', _ = 'which_key_ignore' },
   ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
   ['<leader>u'] = { name = '[U]tilities', _ = 'which_key_ignore' },
@@ -804,6 +825,7 @@ local servers = {
   -- pyright = {},
   -- rust_analyzer = {},
   svelte = {},
+  ocamllsp = { 'ocamllsp' },
   -- tsserver = { 'tsserver' },
   html = { filetypes = { 'html', 'twig', 'hbs' } },
   lua_ls = {
